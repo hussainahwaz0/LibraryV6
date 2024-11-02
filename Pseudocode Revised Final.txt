@@ -1,0 +1,707 @@
+1. Function to Add to File
+
+START  
+    IF quantity is None  
+        IF not stripped content, stripped email, or stripped phone_number 
+            DISPLAY "Invalid Input newline Information has to be provided"  
+            RETURN  
+        ENDIF  
+        OPEN file_name in APPEND mode
+            ASSIGN timestamp from CURRENT_DATE_AND_TIME formatted as "dd-mm-yyyy hh:mm AM/PM"  
+            WRITE content, email, and phone_number with timestamp to file 
+            DISPLAY content + " added to " + file
+        CLOSE file  
+    ELSE  
+        IF not stripped content or stripped quantity
+            DISPLAY "Invalid Input newline Information has to be provided"  
+            RETURN  
+        ENDIF  
+        IF quantity is not an integer  
+            DISPLAY "Invalid Input newline Quantity must be an integer"  
+            RETURN  
+        ENDIF  
+        OPEN file_name in APPEND mode
+            ASSIGN timestamp from CURRENT_DATE_AND_TIME formatted as "dd-mm-yyyy hh:mm AM/PM"  
+            WRITE content and quantity with timestamp TO file 
+            DISPLAY content + " added to " + file  
+        CLOSE file
+    ENDIF  
+END
+
+
+
+2. Function to view file
+
+START 
+    OPEN file_name in READ mode
+        ASSIGN lines from READLINES
+        FOR EACH line in lines
+            DISPLAY line
+        ENDFOR
+    CLOSE file
+END
+
+3.Function to Search 
+
+START 
+    IF not stripped search_term
+        DISPLAY "Invalid input newline value cannot be blank."
+        RETURN None
+    ENDIF
+    OPEN file_name in READ mode
+        ASSIGN lines from READLINES
+        SET found to False
+        FOR EACH line in lines
+            ASSIGN stripped_line from line
+            IF stripped_line is not null and search_term is in stripped_line 
+                DISPLAY "Found: " + stripped_line
+                SET found to True
+                RETURN stripped_line
+            ENDIF
+        ENDFOR
+        IF NOT found
+            DISPLAY search_term + " not found."
+            RETURN None
+        ENDIF
+    CLOSE file
+END 
+
+4. Function to Edit 
+
+START
+    IF not stripped old_term 
+        DISPLAY "Invalid input newline value cannot be blank."
+        RETURN
+    ENDIF
+    IF not stripped new_term 
+        DISPLAY "Invalid input newline value cannot be blank."
+        RETURN
+    ENDIF
+    SET old_term_found to False
+    OPEN file_name in READ mode
+        ASSIGN lines from READLINES
+    CLOSE file
+    OPEN file_name in WRITE mode
+        FOR EACH line in lines
+            IF old_term is in line 
+                ASSIGN edit_date from CURRENT_TIMESTAMP
+                WRITE "new_term" + "| edited on " + edit_date + "| newline"
+                DISPLAY old_term + " updated to " + new_term + "."
+                SET old_term_found to True
+            ELSE
+                WRITE line
+            ENDIF
+        ENDFOR
+    CLOSE file
+    IF old term not found
+        DISPLAY old_term + " not found in " + file_name
+    ENDIF
+END 
+
+5. Function to Remove in File
+
+START
+    IF not stripped search_term
+        DISPLAY "No search term provided."
+        RETURN
+    ENDIF
+    ASSIGN search_term_found to False
+    OPEN file_name in READ mode
+        ASSIGN lines from READLINES
+    CLOSE file
+    OPEN file_name in WRITE mode
+        ASSIGN timestamp from START TIME
+        FOR EACH line in lines
+            IF search_term is in line
+                DISPLAY search_term + " removed on " + timestamp + "."
+                ASSIGN search_term_found to True
+            ELSE
+                WRITE line to file
+            ENDIF
+        ENDFOR
+    CLOSE file
+END 
+
+
+6. Fucntion go back
+
+START
+    WHILE True
+        DISPLAY "Do you want to go back (Y/N):"
+        ASSIGN go_back from INPUT
+        IF go_back not in ["y", "n"]
+            CALL INVALID_INPUT()
+            CALL GO_BACK()
+        ELSE
+            RETURN go_back
+        ENDIF
+    ENDWHILE
+END
+
+7. Function Invalid Input
+
+START
+    DISPLAY 18 "*"
+    DISPLAY "invalid input"
+END
+
+8.Function Check if Member Exists 
+
+START
+    OPEN file "members.txt" in READ mode
+        ASSIGN lines from READLINES
+        FOR EACH line in lines
+            IF username is in line
+                RETURN True
+            ENDIF
+        ENDFOR
+        RETURN False
+        DISPLAY "Member file not found"
+    CLOSE file
+END
+
+
+9. Function for Admin Login
+
+START
+    DISPLAY "Admin Login"
+    ASSIGN attempts to 3
+    WHILE attempts is greater than 0
+        DISPLAY "Enter admin username: "
+        ASSIGN username from INPUT
+        DISPLAY "Enter admin password: "
+        ASSIGN password from INPUT
+        IF username IS IN admins AND admins[username] is equal to password
+            DISPLAY "Login successful... new line Welcome, " + username + "!"
+            RETURN True
+        ELSE
+            ASSIGN attempts TO attempts - 1
+            DISPLAY "Invalid username or password " + attempts + " attempt(s) left."
+        ENDIF
+    ENDWHILE
+    DISPLAY "Too many failed attempts newline Exiting admin login..."
+    RETURN False
+END
+
+10. Librarian Login 
+
+START 
+    DISPLAY "Enter librarian username: "
+    ASSIGN librarian_username from INPUT 
+    OPEN file "librarians.txt" in READ mode
+        FOR EACH line in file
+            ASSIGN username from the first part of line
+            IF librarian_username is equal to username 
+                DISPLAY "Username found"
+                RETURN True
+            ENDIF
+        ENDFOR
+    CLOSE file
+    DISPLAY "Invalid username, Please try again"
+    RETURN False
+END
+
+11. Function for Checking Library Password
+
+START 
+    DISPLAY "Enter Password: "
+    ASSIGN librarian_password from INPUT
+    IF librarian_password is eual to library_pass as string 
+        DISPLAY "Login successful. Accessing Librarian Menu..."
+        RETURN True
+    ELSE
+        DISPLAY "Invalid password newline Please try again"
+        RETURN False
+    ENDIF
+END
+
+
+12. Function to Add loaned books 
+
+START
+    IF not CALL CHECK_MEMBER_EXISTENCE(file_name,member_name,book_name,book_file)
+        DISPLAY "Invalid Input newline Member 'member_name' does not exist."
+        RETURN
+    ENDIF
+    OPEN file in READ mode
+        ASSIGN lines from READLINES
+    IF book_file cannot be opened
+        DISPLAY "the file 'book_file' was not found."
+        RETURN
+    ENDIF
+    CLOSE file
+    SET book_found to False
+    SET updated_lines to an empty list
+    FOR EACH line in lines
+        IF book_name is in line
+            SET book_found to True
+            SPLIT line by '|' and ASSIGN to parts
+            SET amount_available_str to the last word in parts[1]
+            CONVERT amount_available_str to integer and ASSIGN to amount_available
+            
+            IF amount_available is not an integer
+                DISPLAY "Error: The available amount for 'book_name' is not a valid number."
+                RETURN
+            ENDIF
+            IF amount_available greater than 0
+                DECREMENT amount_available by 1
+                UPDATE parts[1] to "amount available amount_available"
+                JOIN parts by '|' and ADD to updated_lines
+            ELSE
+                DISPLAY "Sorry, the book 'book_name' is not available for loan (out of stock)."
+                RETURN
+            ENDIF
+        ELSE
+            ADD line to updated_lines
+        ENDIF
+    ENDFOR
+    IF book_found is False
+        DISPLAY "Sorry, the book 'book_name' is not available in the library."
+        RETURN
+    ENDIF
+    OPEN file in WRITE mode
+        WRITE updated_lines to book_file
+    IF file cannot be opened for writing
+        DISPLAY "An error occurred while updating the book file."
+        RETURN
+    ENDIF
+    CLOSE file
+    OPEN file in APPEND mode
+        ASSIGN loan_date from CURRENT_DATE_AND_TIME formatted as "dd-mm-yy hh:mm AM/PM"
+        WRITE member_name, book_name, and loan_date to file_name
+        DISPLAY "Book 'book_name' loaned to member_name on loan_date. The updated available amount is amount_available."
+    CLOSE file
+END
+
+
+
+13. Function Count Loaned books
+
+
+START
+    DISPLAY "Enter member name:"
+    ASSIGN member_name from INPUT
+    SET count to 0
+    OPEN "loans.txt" file in READ mode
+        FOR EACH line in file
+            SPLIT line by "|" and ASSIGN first part to loan_member
+            IF loan_member is equal to member_name
+                INCREMENT count by 1
+            ENDIF
+        ENDFOR
+    CLOSE file
+    RETURN count
+END
+
+14. Function to Perform loan books
+
+START
+    DISPLAY "Enter member name:"
+    ASSIGN member_name from INPUT
+    DISPLAY "Enter the name of the book:"
+    ASSIGN book_name from INPUT
+    IF check_member_existence(member_name) is False
+        DISPLAY "Member not found."
+        RETURN
+    ENDIF
+    ASSIGN overdue_books from check_overdue_books_for_member(member_name)
+    IF overdue_books is True
+        DISPLAY "You have overdue books. Please return them before loaning a new book."
+        FOR EACH book, days_overdue in overdue_books
+            ASSIGN fee from calculate_fee(days_overdue)
+            DISPLAY "Overdue Book: book | Days Overdue: days_overdue | Fee: RM fee"
+        ENDFOR
+        RETURN
+    ENDIF
+    IF count_loaned_books(member_name) is greater than or equal to 5
+        DISPLAY "Loan limit reached. Please return some books before loaning a new one."
+        RETURN
+    ENDIF
+    CALL add_loaned_book("loans.txt", member_name, book_name, "books.txt")
+END
+
+15. Function to check overdue book for member
+
+START
+    DISPLAY "Enter member name:"
+    ASSIGN member_name from INPUT
+    SET overdue_books to an empty list
+    SET current_date to the current date and time
+    OPEN "loans.txt" file in READ mode
+        ASSIGN Line from READLINES
+        FOR EACH line in lines
+            SPLIT line by "|" and ASSIGN to parts
+            IF length of parts is equal to 3
+                ASSIGN loan_member, book_name, and loan_date_str from parts
+                IF loan_member is equal to member_name
+                    CONVERT loan_date_str to date format "dd-mm-yy hh:mm AM/PM" and ASSIGN to loan_date
+                    calculate days_loaned as the difference in days between current_date and loan_date
+                    IF days_loaned is greater than 14
+                        APPEND (book_name, days_loaned - 14) to overdue_books
+                    ENDIF
+                ENDIF
+            ENDIF
+        ENDFOR
+    CLOSE file
+    RETURN overdue_books
+END
+
+16. Calculate Fee
+
+START
+    IF days_overdue is equal to 1
+        RETURN 2.00
+    ELSE IF days_overdue is equal to 2
+        RETURN 3.00
+    ELSE IF days_overdue is equal to 3
+        RETURN 4.00
+    ELSE IF days_overdue is equal to 4
+        RETURN 5.00
+    ELSE IF days_overdue is equal to 5
+        RETURN 6.00
+    ELSE IF days_overdue is greater than 5
+        RETURN 10.00
+    ELSE
+        RETURN 0.00
+    ENDIF
+END
+
+17. Check Overdue Books
+
+START
+    DISPLAY "Enter the file name:"
+    ASSIGN file_name from INPUT
+    OPEN file_name in READ mode
+        ASSIGN lines from READLINES
+        IF lines is empty
+            DISPLAY "No loaned books found."
+            RETURN
+        ENDIF
+        DISPLAY "--- Checking for Overdue Books ---"
+        FOR EACH line in lines
+            SPLIT line by "|" and ASSIGN to parts
+            IF length of parts is not equal to 3
+                DISPLAY "Skipping invalid entry: " followed by line
+                CONTINUE to the next line
+            ENDIF
+            ASSIGN member_name, book_name, and loan_date_str by stripping each part from parts
+            PARSE loan_date_str to date format "dd-mm-yy hh:mm AM/PM" and ASSIGN to loan_date
+            IF parsing fails
+                DISPLAY "Error parsing date: " followed by loan_date_str and line
+                CONTINUE to the next line
+            ENDIF
+            SET current_date to the current date and time
+            calculate days_loaned as the difference in days between current_date and loan_date
+            IF days_loaned is greater than 14
+                calculate days_overdue as days_loaned - 14
+                CALL CALCULATE_FEE() with days_overdue and ASSIGN result to fee
+                DISPLAY "Book: " followed by book_name " | Borrower: " followed by member_name " | Days Overdue: " followed by days_overdue " | Fee: RM " followed by fee formatted to 2 decimal places
+            ELSE
+                DISPLAY "Book: " followed by book_name " | Borrower: " followed by member_name " | Loaned for " followed by days_loaned " days. Not overdue."
+            ENDIF
+        ENDFOR
+    CLOSE file
+END
+
+
+
+18. View Loaned Books
+
+START
+    DISPLAY "Enter member name:"
+    ASSIGN member_name from INPUT
+    DISPLAY "--- Loaned Books for " member_name " ---"
+    OPEN "loans.txt" file in READ mode
+        ASSIGN lines from READLINES
+        IF lines is empty
+            DISPLAY "No loaned books found."
+        ELSE
+            SET found to False
+            FOR EACH line in lines
+                SPLIT line by "|" and ASSIGN to parts
+                IF length of parts is equal to 3
+                    ASSIGN loan_member, book_name, and loan_date from parts
+                    IF loan_member is equal to member_name
+                        DISPLAY "Book: " book_name " | Loaned on: " loan_date
+                        SET found to True
+                    ENDIF
+                ENDIF
+            ENDFOR
+            IF found is False
+                DISPLAY "No books loaned by " member_name "."
+            ENDIF
+        ENDIF
+    CLOSE file
+END
+
+19. Update Member
+
+START
+    DISPLAY "Enter member username to update:"
+    ASSIGN old_username from INPUT
+    DISPLAY "Enter new username (leave blank to keep current):"
+    ASSIGN new_username from INPUT
+    DISPLAY "Enter new email (leave blank to keep current):"
+    ASSIGN new_email from INPUT
+    DISPLAY "Enter new phone number (leave blank to keep current):"
+    ASSIGN new_phone_number from INPUT
+    SET updated to False
+    OPEN "members.txt" in READ mode
+        ASSIGN Lines from READLINES
+    CLOSE file
+    OPEN "members.txt" in WRITE mode
+        FOR EACH line in lines
+            IF old_username is in line
+                SPLIT line by "|" and ASSIGN to parts
+                IF not stripped new_username
+                    SET parts[0] to new_username
+                ENDIF
+                IF not stripped new_email 
+                    SET parts[1] to new_email
+                ENDIF
+                IF not stipped new_phone_number
+                    SET parts[2] to new_phone_number
+                ENDIF
+                WRITE "|".join(parts) followed by newline to file
+                SET updated to True
+            ELSE
+                WRITE line to file
+            ENDIF
+        ENDFOR
+    CLOSE file
+    IF updated is True
+        DISPLAY old_username " has been updated."
+    ELSE
+        DISPLAY old_username " not found."
+    ENDIF
+END
+
+20. Search Catalogue
+
+START
+    DISPLAY "Enter the name or part of the book title to search:"
+    ASSIGN search_term from INPUT
+    DISPLAY "--- Search Results for '" search_term "' ---"
+    CALL SEARCH_IN_FILE("books.txt" and search_term)
+END
+
+21. Main Menu
+
+START
+    WHILE True
+        DISPLAY "-" 30 times
+        DISPLAY "WELCOME TO BRICKFIELD LIBRARY" in uppercase
+        DISPLAY "-" 30 times
+        DISPLAY "Main Menu"
+        DISPLAY "1. Admin"
+        DISPLAY "2. Librarian"
+        DISPLAY "3. Library Member"
+        DISPLAY "0. Exit"
+        DISPLAY "Enter your choice:"
+        ASSIGN choice from INPUT
+        IF choice is a digit
+            CONVERT choice to integer
+            IF choice is equal to 1
+                IF CALL ADMIN_LOGIN() is True
+                    CALL ADMIN_MENU()
+                ENDIF
+            ELSEIF choice is equal to 2
+                IF CALL LIBRARIAN_LOGIN() is True AND CALL CHECK_LIBRARY_PASS() is True
+                    CALL LIBRARIAN_MENU()
+                ENDIF
+            ELSEIF choice is equal to 3
+                DISPLAY "Enter your member username:"
+                ASSIGN member_name from INPUT
+                IF CALL CHECK_MEMBER_EXISTENCE(member_name) is True
+                    CALL MEMBER_MENU(member_name)
+                ELSE
+                    DISPLAY "Invalid member username. Please try again."
+                ENDIF
+            ELSEIF choice is equal to 0
+                CALL SYS.EXIT() with message "THANK YOU FOR USING BRICKFIELDS LIBRARY" 
+            ELSE
+                CALL INVALID_INPUT()
+            ENDIF
+        ELSE
+            CALL INVALID_INPUT()
+        ENDIF
+    ENDWHILE
+END
+
+22. Admin Menu
+
+START
+    WHILE True
+        DISPLAY "------------"
+        DISPLAY "//Admin Panel//"
+        DISPLAY "1. Add Member"
+        DISPLAY "2. View Members"
+        DISPLAY "3. Search Member"
+        DISPLAY "4. Edit Member"
+        DISPLAY "5. Remove Member"
+        DISPLAY "6. Add Librarian"
+        DISPLAY "7. View Librarians"
+        DISPLAY "8. Search Librarian"
+        DISPLAY "9. Edit Librarian"
+        DISPLAY "10. Remove Librarian"
+        DISPLAY "0. Logout"
+        DISPLAY "Enter your choice:"
+        ASSIGN admin_choice from INPUT
+        IF admin_choice is a digit
+            CONVERT admin_choice to integer
+            IF admin_choice is equal to 1
+                DISPLAY "Enter member username:"
+                ASSIGN username from INPUT
+                DISPLAY "Enter email:"
+                ASSIGN email from INPUT
+                DISPLAY "Enter Phone Number:"
+                ASSIGN phone_number from INPUT
+                CALL ADD_TO_FILE("members.txt", username, None, email, phone_number)
+            ELSEIF admin_choice is equal to 2
+                DISPLAY "\n-----MEMBERS LIST-----\n"
+                CALL VIEW_FROM_FILE("members.txt")
+            ELSEIF admin_choice is equal to 3
+                DISPLAY "Enter member username to search:"
+                ASSIGN username from INPUT
+                CALL SEARCH_IN_FILE("members.txt", username)
+            ELSEIF admin_choice is equal to 4
+                DISPLAY "Enter member username to edit:"
+                ASSIGN username from INPUT
+                DISPLAY "Enter new username:"
+                ASSIGN new_username from INPUT
+                CALL EDIT_IN_FILE("members.txt", username, new_username)
+            ELSEIF admin_choice is equal to 5
+                DISPLAY "Enter member username to remove:"
+                ASSIGN username from INPUT
+                CALL REMOVE_FROM_FILE("members.txt", username)
+            ELSEIF admin_choice is equal to 6
+                DISPLAY "Enter librarian username:"
+                ASSIGN username from INPUT
+                DISPLAY "Enter email:"
+                ASSIGN email from INPUT
+                DISPLAY "Enter phone number:"
+                ASSIGN phone_number from INPUT
+                CALL ADD_TO_FILE("librarians.txt", username, None, email, phone_number)
+            ELSEIF admin_choice is equal to 7
+                DISPLAY "\n-----LIBRARIANS LIST-----\n"
+                CALL VIEW_FROM_FILE("librarians.txt")
+            ELSEIF admin_choice is equal to 8
+                DISPLAY "Enter librarian username to search:"
+                ASSIGN username from INPUT
+                CALL SEARCH_IN_FILE("librarians.txt", username)
+            ELSEIF admin_choice is equal to 9
+                DISPLAY "Enter librarian username to edit:"
+                ASSIGN username from INPUT
+                DISPLAY "Enter new username:"
+                ASSIGN new_username from INPUT
+                CALL EDIT_IN_FILE("librarians.txt", username, new_username)
+            ELSEIF admin_choice is equal to 10
+                DISPLAY "Enter librarian username to remove:"
+                ASSIGN username from INPUT
+                CALL REMOVE_FROM_FILE("librarians.txt", username)
+            ELSEIF admin_choice is equal to 0
+                BREAK
+            ELSE
+                CALL INVALID_INPUT()
+            IF GO_BACK() == "y" THEN
+                CONTINUE
+            ELSE
+                CALL SYS_EXIT "THANK YOU FOR USING BRICKFIELDS LIBRARY"
+        ENDIF
+    ENDWHILE
+END
+
+23. Librarian Menu
+
+START
+    WHILE True
+        DISPLAY "--------------"
+        DISPLAY "//Librarian Panel//"
+        DISPLAY "1. Add Book"
+        DISPLAY "2. View Books"
+        DISPLAY "3. Search Book"
+        DISPLAY "4. Edit Book"
+        DISPLAY "5. Remove Book"
+        DISPLAY "6. Perform Book Loan"
+        DISPLAY "7. Check Overdue Books"
+        DISPLAY "0. Logout"
+        DISPLAY "Enter your choice:"
+        ASSIGN librarian_choice from INPUT
+        IF librarian_choice is a digit
+            CONVERT librarian_choice to integer
+            IF librarian_choice is equal to 1
+                DISPLAY "Enter book name:"
+                ASSIGN book from INPUT
+                DISPLAY "Enter quantity:"
+                ASSIGN quantity from INPUT
+                CALL ADD_TO_FILE("books.txt", book, quantity, None, None)
+            ELSEIF librarian_choice is equal to 2
+                DISPLAY "-----BOOKS LIST-----"
+                CALL VIEW_FROM_FILE("books.txt")
+            ELSEIF librarian_choice is equal to 3
+                DISPLAY "Enter book name to search:"
+                ASSIGN book from INPUT
+                CALL SEARCH_IN_FILE("books.txt", book)
+            ELSEIF librarian_choice is equal to 4
+                DISPLAY "Enter book name to edit:"
+                ASSIGN old_book from INPUT
+                DISPLAY "Enter new book name:"
+                ASSIGN new_book from INPUT
+                CALL EDIT_IN_FILE("books.txt", old_book, new_book)
+            ELSEIF librarian_choice is equal to 5
+                DISPLAY "Enter book name to remove:"
+                ASSIGN book from INPUT
+                CALL REMOVE_FROM_FILE("books.txt", book)
+            ELSEIF librarian_choice is equal to 6
+                CALL PERFORM_BOOK_LOAN()
+            ELSEIF librarian_choice is equal to 7
+                DISPLAY "-----OVERDUE BOOKS LIST-----"
+                CALL CHECK_OVERDUE_BOOKS("loans.txt")
+            ELSEIF librarian_choice is equal to 0
+                BREAK
+            ELSE
+                CALL INVALID_INPUT()
+            IF GO_BACK() == "y" THEN
+                CONTINUE
+            ELSE
+                CALL SYS_EXIT "THANK YOU FOR USING BRICKFIELDS LIBRARY"
+        ENDIF
+    ENDWHILE
+END
+
+Member Menu 
+
+START
+    DEFINE member_menu(member_name)
+    WHILE True
+        DISPLAY "-"20 times
+        DISPLAY "WELCOME {member_name}!"
+        DISPLAY "-"20 times
+        DISPLAY "//Library Member Menu//"
+        DISPLAY "1. View Loaned Books"
+        DISPLAY "2. Update Profile"
+        DISPLAY "3. Search Catalogue"
+        DISPLAY "0. Logout"
+        DISPLAY "Enter your choice:"
+        ASSIGN member_choice from INPUT
+        IF member_choice is a digit
+            CONVERT member_choice to integer
+            IF member_choice is equal to 1
+                DISPLAY "-----MY LOANS LIST-----"
+                CALL VIEW_LOANED_BOOKS(member_name)
+            ELSEIF member_choice is equal to 2
+                CALL UPDATE_MEMBER(member_name)
+            ELSEIF member_choice is equal to 3
+                CALL SEARCH_CATALOGUE()
+            ELSEIF member_choice is equal to 0
+                BREAK
+            ELSE
+                CALL INVALID_INPUT()
+            IF GO_BACK() == "y" THEN
+                CONTINUE
+            ELSE
+                CALL SYS_EXIT "THANK YOU FOR USING BRICKFIELDS LIBRARY"
+            ENDIF
+        ENDIF
+    ENDWHILE
+END
